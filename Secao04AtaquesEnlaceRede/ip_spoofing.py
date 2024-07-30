@@ -50,5 +50,16 @@ def generate_ip(net: str, net_mask: str) -> str:
 
     return new_ip
 
+def ip_spoofing(victim_ip: str, attacker_ip: str) -> IP:
+    ip = IP()
 
-print(generate_ip("192.168.177.0", "/22"))
+    ip.src = attacker_ip
+    ip.dst = victim_ip
+
+    return ip
+
+victim_ip = "192.168.56.103"
+attacker_ip = generate_ip("192.168.56.0", "/24")
+
+ip = ip_spoofing(victim_ip, attacker_ip)
+ip.show()
