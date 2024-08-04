@@ -10,13 +10,32 @@ AES_MAC_TAG_SIZE = 16
 
 @dataclass
 class AESReturnEAXMode:
-    key: bytes
-    nonce: bytes
-    mac_tag: bytes
-    ciphertext: bytes
+    key: bytes = b""
+    nonce: bytes = b""
+    mac_tag: bytes = b""
+    ciphertext: bytes = b""
 
-    def format_into_bytes(self) -> bytes:
+    def pack_bytes(self) -> bytes:
         return self.key + self.nonce + self.mac_tag + self.ciphertext
+
+    def unpack_bytes(self, data: bytes, must_return: bool = False):
+        key = data[0:AES_KEY_SIZE]
+        nonce = data[AES_KEY_SIZE : AES_KEY_SIZE + AES_NONCE_SIZE]
+        mac_tag = data[
+            AES_KEY_SIZE
+            + AES_NONCE_SIZE : AES_KEY_SIZE
+            + AES_NONCE_SIZE
+            + AES_MAC_TAG_SIZE
+        ]
+        ciphertext = data[AES_KEY_SIZE + AES_NONCE_SIZE + AES_MAC_TAG_SIZE :]
+
+        if must_return:
+            return AESReturnEAXMode(key, nonce, mac_tag, ciphertext)
+
+        self.key = key
+        self.nonce = nonce
+        self.mac_tag = mac_tag
+        self.ciphertext = ciphertext
 
 
 def aes_encrypt(data: bytes) -> AESReturnEAXMode:
@@ -26,7 +45,7 @@ def aes_encrypt(data: bytes) -> AESReturnEAXMode:
     encrypt_cipher = AES.new(key, AES.MODE_EAX, nonce=nonce, mac_len=AES_MAC_TAG_SIZE)
     ciphertext, mac_tag = encrypt_cipher.encrypt_and_digest(data)
 
-    return AESReturnEAXMode(ciphertext, key, nonce, mac_tag)
+    return AESReturnEAXMode(key, nonce, mac_tag, ciphertext)
 
 
 def aes_decrypt(aes_return: AESReturnEAXMode) -> bytes:

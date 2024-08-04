@@ -5,8 +5,8 @@ import sys
 import threading
 import time
 
-MAX_DATA_SIZE = 512
-SLEEP_SECONDS = 1
+MAX_DATA_SIZE = 256
+SLEEP_SECONDS = 2
 
 
 def print_line():
@@ -38,7 +38,7 @@ class ICMPTunneler:
 
             aes_return = aes.aes_encrypt(file_data)
 
-            buffer = aes_return.format_into_bytes()
+            buffer = aes_return.pack_bytes()
             buffer_size = len(buffer)
 
             packet_counter = 1
@@ -93,6 +93,7 @@ class ICMPTunneler:
 
     def run(self, must_sniff: bool = False):
         self.main_menu()
+        print_line()
 
         self.send_thread = threading.Thread(target=self.send)
         self.send_thread.start()
