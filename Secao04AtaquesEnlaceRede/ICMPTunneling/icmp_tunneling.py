@@ -1,11 +1,12 @@
 from scapy.all import ICMP, IP, send
 
+import aes
 import os
 import sys
 import threading
 import time
 
-MAX = 512
+MAX_DATA_SIZE = 512
 
 
 class ICMPTunneler:
@@ -21,13 +22,13 @@ class ICMPTunneler:
 
         with open(self.file_path, "rb") as file:
             file_size = os.path.getsize(self.file_path)
-            
+
             i = 1
 
             while file_size > 0:
                 try:
-                    buffer = file.read(MAX)
-                    file_size -= MAX
+                    buffer = file.read(MAX_DATA_SIZE)
+                    file_size -= MAX_DATA_SIZE
 
                     packet = ip / icmp / buffer
                     send(packet, verbose=False)
