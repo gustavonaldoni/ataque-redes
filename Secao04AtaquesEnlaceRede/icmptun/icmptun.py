@@ -52,9 +52,13 @@ class ICMPTun:
                 file_data = file.read()
                 file_size = len(file_data)
 
-                aes_return = aes.aes_encrypt(file_data)
+                if self.args.encrypted == "yes":
+                    aes_return = aes.aes_encrypt(file_data)
+                    buffer = aes_return.pack_bytes()
 
-                buffer = aes_return.pack_bytes()
+                elif self.args.encrypted == "no":
+                    buffer = file_data
+
                 buffer_size = len(buffer)
 
                 last_block_data_size = buffer_size % MAX_DATA_SIZE
@@ -66,13 +70,19 @@ class ICMPTun:
                 print(f"    - Destination IP:       {ip.dst}")
                 print(f"    - Data block size:      {MAX_DATA_SIZE} bytes")
                 print(f"    - Last block data size: {last_block_data_size} bytes")
-                print(f"    - Encryption:           AES-{aes.AES_KEY_SIZE* 8} EAX")
+                
+                if self.args.encrypted == "yes":
+                    print(f"    - Encryption:           AES-{aes.AES_KEY_SIZE* 8} EAX")
+                
                 print_line()
 
                 print(f"[*] Buffer size:            {buffer_size} bytes")
-                print(f"    - Key size:             {aes.AES_KEY_SIZE} bytes")
-                print(f"    - Nonce size:           {aes.AES_NONCE_SIZE} bytes")
-                print(f"    - MAC Tag size:         {aes.AES_MAC_TAG_SIZE} bytes")
+
+                if self.args.encrypted == "yes":
+                    print(f"    - Key size:             {aes.AES_KEY_SIZE} bytes")
+                    print(f"    - Nonce size:           {aes.AES_NONCE_SIZE} bytes")
+                    print(f"    - MAC Tag size:         {aes.AES_MAC_TAG_SIZE} bytes")
+                
                 print(f"    - File size:            {file_size} bytes")
                 print_line()
 
@@ -111,9 +121,6 @@ class ICMPTun:
                         print("Keyboard interruption. Quiting ...")
                         sys.exit()
 
-        if self.args.data:
-            pass
-
     def run(self):
         self.main_menu()
         print_line()
@@ -134,9 +141,9 @@ def main():
         epilog=textwrap.dedent(epilog),
     )
 
-    parser.add_argument("-t", "--target", help="specified IP")
-    parser.add_argument("-f", "--file", help="file to send")
-    parser.add_argument("-d", "--data", help="data to send")
+    parser.add_argument("-t", "--target", required=True, help="specified IP")
+    parser.add_argument("-f", "--file", required=True, help="file to send")
+    parser.add_argument("-e", "--encrypted", required=False, default="yes", help="use encryption (AES EAX)")
 
     args = parser.parse_args()
 
