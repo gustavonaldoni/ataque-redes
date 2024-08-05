@@ -1,0 +1,5 @@
+Examples:
+    icmptun.py -t 192.168.56.103 -f image.jpeg              # Send file through ICMP (with encryption)
+    icmptun.py -t 192.168.56.103 -f image.jpeg -e 0         # Send file through ICMP without encryption
+    icmptun.py -t 192.168.56.103 -d 'ABCD'                  # Send text data through ICMP
+    icmptun.py -t 192.168.56.103 -d 'ABCD' -f image.jpeg    # Send text and file through ICMP
