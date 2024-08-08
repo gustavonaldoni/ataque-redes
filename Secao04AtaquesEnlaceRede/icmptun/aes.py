@@ -4,8 +4,8 @@ from dataclasses import dataclass
 import secrets
 
 AES_KEY_SIZE = 32  # 32 bytes * 8 = 256 bits
-AES_NONCE_SIZE = 16
-AES_MAC_TAG_SIZE = 16
+AES_NONCE_SIZE = 16  # 16 bytes * 8 = 128 bits
+AES_MAC_TAG_SIZE = 16  # 16 bytes * 8 = 128 bits
 
 
 @dataclass

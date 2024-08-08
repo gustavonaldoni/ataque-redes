@@ -1,4 +1,4 @@
-from scapy.all import ICMP, IP, send, sniff, wrpcap
+from scapy.all import ICMP, IP, send
 
 import aes
 import argparse
@@ -7,8 +7,8 @@ import textwrap
 import threading
 import time
 
-MAX_DATA_SIZE = 512
-SLEEP_SECONDS = 1
+MAX_DATA_SIZE = 512  # 512 bytes
+SLEEP_SECONDS = 0.1
 
 
 def print_line():
@@ -33,7 +33,7 @@ def calculate_packet_size(is_the_last: bool, buffer_size: int) -> int:
     return data_size + headers_size
 
 
-class ICMPTun:
+class ICMPTunClient:
     def __init__(self, args) -> None:
         self.args = args
 
@@ -70,10 +70,10 @@ class ICMPTun:
                 print(f"    - Destination IP:       {ip.dst}")
                 print(f"    - Data block size:      {MAX_DATA_SIZE} bytes")
                 print(f"    - Last block data size: {last_block_data_size} bytes")
-                
+
                 if self.args.encrypted == "yes":
                     print(f"    - Encryption:           AES-{aes.AES_KEY_SIZE* 8} EAX")
-                
+
                 print_line()
 
                 print(f"[*] Buffer size:            {buffer_size} bytes")
@@ -82,7 +82,7 @@ class ICMPTun:
                     print(f"    - Key size:             {aes.AES_KEY_SIZE} bytes")
                     print(f"    - Nonce size:           {aes.AES_NONCE_SIZE} bytes")
                     print(f"    - MAC Tag size:         {aes.AES_MAC_TAG_SIZE} bytes")
-                
+
                 print(f"    - File size:            {file_size} bytes")
                 print_line()
 
@@ -129,6 +129,17 @@ class ICMPTun:
         self.send_thread.start()
 
 
+class ICMPTunServer:
+    def __init__(self, args) -> None:
+        self.args = args
+
+    def receive(self):
+        pass
+
+    def run(self):
+        pass
+
+
 def main():
     epilog = ""
 
@@ -143,11 +154,17 @@ def main():
 
     parser.add_argument("-t", "--target", required=True, help="specified IP")
     parser.add_argument("-f", "--file", required=True, help="file to send")
-    parser.add_argument("-e", "--encrypted", required=False, default="yes", help="use encryption (AES EAX)")
+    parser.add_argument(
+        "-e",
+        "--encrypted",
+        required=False,
+        default="yes",
+        help="use encryption (AES EAX)",
+    )
 
     args = parser.parse_args()
 
-    icmptun = ICMPTun(args)
+    icmptun = ICMPTunClient(args)
     icmptun.run()
 
 
